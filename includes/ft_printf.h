@@ -5,110 +5,100 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: qgonzalv <qgonzalv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2018/05/16 16:12:02 by qgonzalv          #+#    #+#             */
-/*   Updated: 2019/05/10 16:25:28 by qgonzalv         ###   ########.fr       */
+/*   Created: 2019/09/05 16:19:50 by qgonzalv          #+#    #+#             */
+/*   Updated: 2019/09/06 09:55:07 by qgonzalv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FT_PRINTF_H
-#include <stdarg.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <wchar.h>
-#include "../../LibFT/libft.h"
 # define FT_PRINTF_H
-# define M_DIEZE		0x01	//00000001
-# define M_NDIEZE 	0xfe	//11111110
-# define M_MINUS		0x02	//00000010
-# define M_NMINUS	0xfd	//11111101
-# define M_MORE		0x04	//00000100
-# define M_NMORE		0xfb	//11111011
-# define M_SPACE		0x08	//00001000
-# define M_NSPACE	0xf7	//11110111
-# define M_ZERO		0x10	//00010000
-# define M_NZERO		0xef	//11101111
-# define PF_LEN_NONE	0
-# define PF_LEN_HH	1
-# define PF_LEN_H	2
-# define PF_LEN_Z	3
-# define PF_LEN_T	4
-# define PF_LEN_J	5
-# define PF_LEN_L	6
-# define PF_LEN_LL	7
+# define BUFFSIZE 4096
+# define OPT "#-+ 0123456789.hlLzcCsSpDdioUueEfFgGxX"
+# define CONVTYPE "CcSspDdioUufFxX"
+# define INTEGERS "dDiUuoxX"
+# define PRCNT " #*-+0123456789%."
+# define FLAG "#+- 0"
+# define SIZE "hlLz"
+# define PREC ".0123456789"
+# define B_HEXL "0123456789abcdef"
+# define B_HEXC "0123456789ABCDEF"
+# define B_TENT "0123456789"
+# define B_OCTA "01234567"
+# include <stdlib.h>
+# include <unistd.h>
+# include <stdarg.h>
+# include <stdint.h>
+# include <wchar.h>
+# include <sys/types.h>
+# include "libft.h"
 
-typedef unsigned long long t_ull;
+char	g_buff[BUFFSIZE];
+int		g_buffi;
 
-typedef struct s_arg
-{
-   	char		flags;
-    int         fd;
-    int         wdth;
-    int         acc;
-    char        len;
-    char        spe;
-    char        base;
-}               t_arg;
+typedef union	u_varpkg {
+	void			*vptr;
+	char			car;
+	wint_t			carc;
+	char			*str;
+	wchar_t			*strs;
+	intmax_t		intmaxt;
+	uintmax_t		uintmaxt;
+	long double		ldble;
+}				t_var;
 
-typedef struct  s_spe
-{
-    int      (*ptrfonct)(va_list ap,t_arg *arg);
-    char        key;
-}               t_spe;
+typedef struct	s_args {
+	char		prefi;
+	char		signs;
+	char		justi;
+	int			width;
+	int			preci;
+	int			zfill;
+	char		*fsize;
+	char		type;
+}				t_args;
 
-int         spe_founder(t_arg *arg, const char *c, va_list ap, int i);
-int			ft_printf(char const *s, ...);
-void        found_lenght(t_arg *arg, const char *s, int *i);
+typedef struct	s_formats {
+	t_args		arg;
+	t_var		va_holder;
+	int			native_index;
+	int			fg_va_holder;
+	int			negative;
+	char		*native_form;
+	char		*final_form;
+	int			finfg;
+}				t_form;
 
-int			ft_unsigned_pars(va_list va, t_arg *arg);
-int			ft_signed_pars(va_list va, t_arg *arg);
-int			ft_str_pars(va_list va, t_arg *arg);
-int			ft_letter_pars(va_list va, t_arg *arg);
-
-static int	ft_signed_cnt(long long n, t_arg *arg);
-static int	ft_unsigned_cnt(t_ull n, t_arg *arg);
-static int	ft_more_unsigned_cnt(t_ull n, char cnt, t_arg *arg);
-
-static int	ft_letter_buff(char *s, t_arg *arg, int len);
-
-void		ft_init_arg(char const *s, int *i, va_list va, t_arg *arg);
-static void	ft_get_arg(char const *s, int *i, va_list va, t_arg *arg);
-static void	ft_get_length(char const *s, int *i, t_arg *arg);
-static char	ft_get_flag(char const *s, int *i, t_arg *arg);
-static int	ft_get_with_n_accur(char const *s, int *i, va_list va);
-
-int	        ft_buff_hexa(t_ull n, t_arg *arg, char cnt, int len);
-int     	ft_buff_octa(t_ull n, t_arg *arg, char cnt, int len);
-int     	ft_buff_udeci(t_ull n, t_arg *arg, char cnt, int len);
-int     	ft_buff_bin(t_ull n, t_arg *arg, char cnt, int len);
-
-int		    ft_fill(char *s, char *s2, int len);
-char    	ft_cntb(long long n, char b);
-char	    *ft_strupper(char *s);
-size_t  	ft_putstr_fdbis(char const *s, int fd);
-char	    ft_ucntb(t_ull n, char b);
-char	    *ft_itoab(long long n, char b, char *out);
-size_t	    ft_strnlen(const char *s, size_t maxlen);
-char	    *ft_uitoab(unsigned long long n, char b, char *out);
-size_t	    ft_strclen(char const *str, int c);
-// char	ft_define_fd(char const *s, int *i, va_list va, t_arg *arg);
-
-int			ft_buff_deci(long long n, t_arg *arg, char cnt, int len);
-
-
-t_spe g_tab[] =
-{
-    {&ft_unsigned_pars, 'x'},
-    {&ft_unsigned_pars, 'u'},
-    {&ft_unsigned_pars, 'o'},
-    {&ft_unsigned_pars, 'X'},
-    {&ft_signed_pars, 'd'},
-    {&ft_signed_pars, 'i'},
-    {&ft_str_pars, 's'},
-    {&ft_letter_pars, 'c'},
-    //{&flag_x, 'x'},
-    // {&spe_X, 'X'},
-    // {&spe_porcent, '%'},
-     {NULL, -1}
-};
-
+int				ft_printf(const char *format, ...);
+int				prct(const char *p);
+int				update(const char *p);
+int				isprcnt(const char *p);
+int				init_form(t_form *form);
+void			init_gvars(void);
+int				init_fg(t_args *fg);
+void			t_form_freer(t_form *form);
+int				buff_print(void);
+int				securebuffer(char c);
+int				print_flush(char *form);
+int				print_dispatch(t_form *fin);
+int				check_set_form(const char *temp_form, va_list arg);
+int				parse_set_fg_flags(t_form *form, char *nat);
+int				parse_set_fg_pre(t_form **fg, char *format);
+int				parse_set_fg_siz(t_form **fg, char *format);
+int				parse_set_fg_pad(t_form **form, char *format);
+int				parse_set_fg_wid(t_form **fg, char *format);
+int				va_select(t_form *form, va_list arg);
+int				cva(t_form **form, va_list arg);
+int				sva(t_form **form, va_list arg);
+int				diva(t_form **form, va_list arg);
+int				uva(t_form **form, va_list arg);
+int				fva(t_form **form, va_list arg);
+int				tostrdispatch(t_form *form);
+char			*str_renderer(t_form **fm);
+char			*c_renderer(t_form **fm);
+char			*p_renderer(t_form **fm);
+char			*lc_renderer(t_form **fm);
+char			*ls_renderer(t_form **fm);
+char			*int_renderer(t_form **fm);
+char			*f_renderer(t_form **fm);
+char			*padrenderer(char *fin, t_form *fm, int len);
 #endif
